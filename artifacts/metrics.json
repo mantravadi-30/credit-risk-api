@@ -1,0 +1,47 @@
+{
+    "validation": {
+        "roc_auc": 0.8710918657758518,
+        "pr_auc": 0.4047239958558334,
+        "ks_statistic": 0.5873616251119768,
+        "confusion_matrix": [
+            [
+                16906,
+                4090
+            ],
+            [
+                331,
+                1173
+            ]
+        ]
+    },
+    "test": {
+        "roc_auc": 0.8635594343198095,
+        "pr_auc": 0.40936146374740756,
+        "ks_statistic": 0.5717603758365322,
+        "confusion_matrix": [
+            [
+                16943,
+                4053
+            ],
+            [
+                358,
+                1146
+            ]
+        ]
+    },
+    "cross_validation": {
+        "best_roc_auc": 0.8651540997088233
+    },
+    "scale_pos_weight": 13.961527500712453,
+    "best_parameters": {
+        "subsample": 0.7,
+        "reg_lambda": 10,
+        "reg_alpha": 1,
+        "n_estimators": 300,
+        "min_child_weight": 5,
+        "max_depth": 5,
+        "learning_rate": 0.03,
+        "gamma": 0,
+        "colsample_bytree": 0.8
+    }
+}

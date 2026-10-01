@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+.pytest_cache/
+.DS_Store
+.ipynb_checkpoints/
+*.pyc
+.env
+
+# Dataset files
+data/
+
+# Jupyter checkpoints
+notebooks/.ipynb_checkpoints/

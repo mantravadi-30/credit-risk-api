@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pandas
+numpy
+scikit-learn==1.7.2
+xgboost==3.4.1
+shap==0.52.0
+joblib
+pydantic
+streamlit==1.64.0
+requests
+python-multipart
+pytest
+httpx

@@ -73,7 +73,13 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
-
+@app.get("/")
+def root():
+    return {
+        "message": "Credit Risk API is running",
+        "docs": "/docs",
+        "health": "/health"
+    }
 
 # ============================================================
 # CORS

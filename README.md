@@ -1,6 +1,6 @@
 # 💳 Credit Risk Prediction API
 
-An end-to-end machine learning system that predicts the probability of loan default and explains _why_ - using XGBoost for prediction, SHAP for per-decision interpretability, FastAPI for serving, Streamlit for the dashboard, and Docker for reproducible deployment.
+An end-to-end machine learning system that predicts the probability of loan default and explains why, using XGBoost for prediction, SHAP for per-decision interpretability, FastAPI for serving, Streamlit for the dashboard, and Docker for reproducible deployment.
 
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688)
@@ -35,7 +35,7 @@ An end-to-end machine learning system that predicts the probability of loan defa
 
 ## Abstract
 
-Lending decisions carry real financial and human consequences, which makes a "black box" risk score a liability, not just a technical shortcoming - a rejected applicant and the underwriter signing off both deserve to know _why_. This project predicts the probability that a loan applicant will experience serious financial distress using a gradient-boosted tree ensemble (XGBoost) trained on the **Give Me Some Credit** dataset, and pairs every prediction with a SHAP (SHapley Additive exPlanations) breakdown of the features that drove it. The system is split into a stateless FastAPI scoring service and a Streamlit dashboard that consumes it over HTTP — the same separation a production loan-origination pipeline would use, so the model can be scaled, versioned, and monitored independently of the UI.
+Lending decisions carry real financial and human consequences, which makes a "black box" risk score a liability, not just a technical shortcoming. A rejected applicant and the underwriter signing off on the decision both deserve to know why. This project predicts the probability that a loan applicant will experience serious financial distress using a gradient-boosted tree ensemble (XGBoost) trained on the **Give Me Some Credit** dataset, and pairs every prediction with a SHAP (SHapley Additive exPlanations) breakdown of the features that drove it. The system is split into a stateless FastAPI scoring service and a Streamlit dashboard that consumes it over HTTP, the same separation a production loan-origination pipeline would use, so the model can be scaled, versioned, and monitored independently of the UI.
 
 ## Results
 
@@ -56,7 +56,7 @@ Test confusion matrix:
  [  358, 1146]]
 ```
 
-**Why four metrics instead of accuracy:** the dataset is roughly 93/7 imbalanced (97,982 vs. 7,018 in training), so accuracy alone is close to meaningless — predicting "no default" every time would score ~93% while being useless. ROC-AUC measures ranking quality across all thresholds; PR-AUC is the more honest metric under imbalance because it doesn't credit the model for trivially easy true negatives; and the **KS statistic** — the maximum separation between the cumulative score distributions of defaulters vs. non-defaulters — is the metric credit risk teams actually lead with. KS above 0.3 is considered a usable scorecard; **0.57 is a strong result.**
+**Why four metrics instead of accuracy:** the dataset is roughly 93/7 imbalanced (97,982 vs. 7,018 in training), so accuracy alone is close to meaningless; predicting "no default" every time would score ~93% while being useless. ROC-AUC measures ranking quality across all thresholds. PR-AUC is the more honest metric under imbalance because it doesn't credit the model for trivially easy true negatives. The **KS statistic**, the maximum separation between the cumulative score distributions of defaulters vs. non-defaulters, is the metric credit risk teams actually lead with. KS above 0.3 is considered a usable scorecard; **0.57 is a strong result.**
 
 ## Architecture
 
@@ -93,7 +93,7 @@ Test confusion matrix:
               (single applicant + batch CSV)
 ```
 
-The Streamlit app never imports the model directly — it only calls the API over HTTP. This means the model can be redeployed, rolled back, or scaled without touching the UI, and the UI can be swapped out without retraining anything.
+The Streamlit app never imports the model directly; it only calls the API over HTTP. This means the model can be redeployed, rolled back, or scaled without touching the UI, and the UI can be swapped out without retraining anything.
 
 ## Dataset
 
@@ -106,7 +106,7 @@ Original applicant-level attributes:
 - Debt ratio
 - Monthly income
 - Number of open credit lines and loans
-- Number of 30–59 / 60–89 day past-due incidents
+- Number of 30-59 / 60-89 day past-due incidents
 - Number of 90+ day late incidents
 - Number of real estate loans or lines
 - Number of dependents
@@ -115,14 +115,14 @@ Original applicant-level attributes:
 
 Four additional features were engineered from the raw attributes above, computed **before** imputation and included in the final 14-feature model input:
 
-| Feature              | Definition                                                                    |
-| -------------------- | ----------------------------------------------------------------------------- |
-| `TotalPastDue`       | 30–59 days past due + 60–89 days past due + 90+ days late                     |
-| `IncomePerDependent` | `MonthlyIncome / (NumberOfDependents + 1)` — the `+1` avoids division by zero |
-| `CreditLinesPerAge`  | `NumberOfOpenCreditLinesAndLoans / (age + 1)`                                 |
-| `PastDueRate`        | `TotalPastDue / (NumberOfOpenCreditLinesAndLoans + 1)`                        |
+| Feature              | Definition                                                                   |
+| -------------------- | ---------------------------------------------------------------------------- |
+| `TotalPastDue`       | 30-59 days past due + 60-89 days past due + 90+ days late                    |
+| `IncomePerDependent` | `MonthlyIncome / (NumberOfDependents + 1)`, the `+1` avoids division by zero |
+| `CreditLinesPerAge`  | `NumberOfOpenCreditLinesAndLoans / (age + 1)`                                |
+| `PastDueRate`        | `TotalPastDue / (NumberOfOpenCreditLinesAndLoans + 1)`                       |
 
-All four are derived purely from raw applicant inputs — none depend on the target or on information unavailable at the moment of underwriting.
+All four are derived purely from raw applicant inputs, none depend on the target or on information unavailable at the moment of underwriting.
 
 ## Data splitting
 
@@ -134,13 +134,13 @@ Stratified split to preserve class distribution across sets:
 | Validation | 15%   | 22,500  |
 | Test       | 15%   | 22,500  |
 
-`random_state=42` for reproducibility. The `SimpleImputer` (median strategy) is fit **only** on the training split and reused unmodified on validation, test, and every live inference request — preventing information from val/test, or from a real applicant at serving time, from leaking into what counts as a "typical" value.
+`random_state=42` for reproducibility. The `SimpleImputer` (median strategy) is fit **only** on the training split and reused unmodified on validation, test, and every live inference request, preventing information from val/test, or from a real applicant at serving time, from leaking into what counts as a "typical" value.
 
 ## Model
 
-**Algorithm:** XGBoost — chosen because the problem is structured/tabular with nonlinear interactions between financial variables (e.g., high utilization _combined with_ recent delinquency compounding risk beyond either alone), which plays to tree ensembles' strengths over linear models or deep learning on a feature set this small.
+**Algorithm:** XGBoost, chosen because the problem is structured/tabular with nonlinear interactions between financial variables (e.g., high utilization combined with recent delinquency compounding risk beyond either alone), which plays to tree ensembles' strengths over linear models or deep learning on a feature set this small.
 
-**Class imbalance:** handled via `scale_pos_weight = 13.96` rather than synthetic oversampling (SMOTE) — reweighting the loss makes the rare class matter more during training without fabricating applicant records.
+**Class imbalance:** handled via `scale_pos_weight = 13.96` rather than synthetic oversampling (SMOTE). Reweighting the loss makes the rare class matter more during training without fabricating applicant records.
 
 **Hyperparameter tuning:** `RandomizedSearchCV`, 20 parameter combinations, 3-fold stratified cross-validation, scored on ROC-AUC. Best CV ROC-AUC: **0.8652**.
 
@@ -158,11 +158,11 @@ gamma              = 0
 colsample_bytree   = 0.8
 ```
 
-The non-trivial `reg_lambda`/`reg_alpha` and shallow `max_depth=5` were selected by the search itself, not hand-picked — evidence the search is actively penalizing complexity rather than overfitting to the training split.
+The non-trivial `reg_lambda`/`reg_alpha` and shallow `max_depth=5` were selected by the search itself, not hand-picked; this is evidence the search is actively penalizing complexity rather than overfitting to the training split.
 
 ## Explainability with SHAP
 
-Every prediction — single or batch — returns the top features that drove it, computed via `shap.TreeExplainer`. This explainer computes **exact** Shapley values for tree ensembles in polynomial time, which is what makes real-time, per-request explanations feasible inside an API call; the model-agnostic `KernelExplainer` would be exponentially slower and unusable at request latency.
+Every prediction, single or batch, returns the top features that drove it, computed via `shap.TreeExplainer`. This explainer computes **exact** Shapley values for tree ensembles in polynomial time, which is what makes real-time, per-request explanations feasible inside an API call. The model-agnostic `KernelExplainer` would be exponentially slower and unusable at request latency.
 
 Top global SHAP features (based on 5,000 test samples):
 
@@ -176,13 +176,13 @@ Top global SHAP features (based on 5,000 test samples):
 
 ## Risk bands
 
-| Probability | Risk band |
-| ----------- | --------- |
-| < 0.20      | Low       |
-| 0.20 – 0.50 | Medium    |
-| ≥ 0.50      | High      |
+| Probability  | Risk band |
+| ------------ | --------- |
+| < 0.20       | Low       |
+| 0.20 to 0.50 | Medium    |
+| ≥ 0.50       | High      |
 
-These are **project-defined business-rule thresholds, not statistically calibrated decision boundaries** — a reasonable demo default, not a regulatory-grade cutoff, and that distinction is stated explicitly rather than implying false precision.
+These are **project-defined business-rule thresholds, not statistically calibrated decision boundaries.** They're a reasonable demo default, not a regulatory-grade cutoff, and that distinction is stated explicitly rather than implying false precision.
 
 ## API reference
 
@@ -256,7 +256,7 @@ Scores a single applicant.
 }
 ```
 
-Invalid input (missing field, out-of-range value) returns `422` naming the exact offending field — never a raw stack trace.
+Invalid input (missing field, out-of-range value) returns `422` naming the exact offending field, never a raw stack trace.
 
 ### `POST /predict/batch`
 
@@ -264,15 +264,15 @@ Accepts a JSON array of applicants, returns predictions in the same order. Backs
 
 ## Streamlit dashboard
 
-- **Single applicant** — form-based input calling `/predict`, rendering a risk gauge and a color-coded SHAP factor breakdown (red = increases risk, green = decreases risk).
-- **Batch CSV** — upload a CSV, score every row via `/predict/batch`, download results.
-- **Live API status indicator** — calls `/health` so the dashboard never silently fails against a down backend.
-- The frontend never loads the model directly, only talks to FastAPI — keeping the presentation layer and model-serving layer fully separate.
+- **Single applicant:** form-based input calling `/predict`, rendering a risk gauge and a color-coded SHAP factor breakdown (red = increases risk, green = decreases risk).
+- **Batch CSV:** upload a CSV, score every row via `/predict/batch`, download results.
+- **Live API status indicator:** calls `/health` so the dashboard never silently fails against a down backend.
+- The frontend never loads the model directly, only talks to FastAPI, keeping the presentation layer and model-serving layer fully separate.
 - `API_URL` is read from the environment (defaulting to `http://127.0.0.1:8000` locally), which is what lets the same code run unmodified both locally and in Docker Compose, where the Streamlit container reaches the API container by its service name instead of `localhost`.
 
 ## Validation & testing
 
-Input validation via Pydantic: age bounded to (0, 120], financial values non-negative, required fields enforced, invalid types rejected — all returning clean `422`s.
+Input validation via Pydantic: age bounded to (0, 120], financial values non-negative, required fields enforced, invalid types rejected, all returning clean `422`s.
 
 ```bash
 python3 -m pytest tests/ -v
@@ -283,7 +283,7 @@ Four tests, currently **4 passed**:
 1. A valid request returns a well-formed `200`.
 2. A request missing a required field returns `422`.
 3. An out-of-range value (age = 150) returns `422`.
-4. **Directional sanity check** — raising `RevolvingUtilizationOfUnsecuredLines` from 0.02 to 0.95, holding everything else constant, must increase predicted risk. This is the test that proves the model behaves correctly, not just that the code runs.
+4. **Directional sanity check:** raising `RevolvingUtilizationOfUnsecuredLines` from 0.02 to 0.95, holding everything else constant, must increase predicted risk. This is the test that proves the model behaves correctly, not just that the code runs.
 
 ## Project structure
 
@@ -345,21 +345,21 @@ docker compose up --build
 - FastAPI: http://localhost:8000 (Swagger docs at `/docs`)
 - Streamlit: http://localhost:8501
 
-`docker-compose.yml` sets `API_URL=http://api:8000` for the Streamlit container, using Docker's internal service-name DNS rather than `localhost` — easy to get wrong, and it silently breaks container-to-container calls if missed.
+`docker-compose.yml` sets `API_URL=http://api:8000` for the Streamlit container, using Docker's internal service-name DNS rather than `localhost`. This is easy to get wrong, and it silently breaks container-to-container calls if missed.
 
 ## Key engineering decisions
 
 **Why XGBoost?**
-The dataset is structured/tabular with nonlinear relationships between financial variables — exactly where gradient-boosted trees outperform linear models, without the data volume or structure (sequential, spatial) that would justify deep learning.
+The dataset is structured/tabular with nonlinear relationships between financial variables, exactly where gradient-boosted trees outperform linear models, without the data volume or structure (sequential, spatial) that would justify deep learning.
 
 **Why `scale_pos_weight` over SMOTE?**
-SMOTE synthesizes interpolated applicants in feature space — a weaker fit for tree models and a risk of unrealistic synthetic profiles in a credit context. Reweighting the loss achieves the same goal without fabricating data.
+SMOTE synthesizes interpolated applicants in feature space, a weaker fit for tree models and a risk of unrealistic synthetic profiles in a credit context. Reweighting the loss achieves the same goal without fabricating data.
 
 **Why fit the imputer only on training data?**
 Fitting on the full dataset before splitting would leak validation/test statistics into training; the same leak would occur at serving time if a new applicant's "typical" value were computed from a window including itself.
 
 **Why `shap.TreeExplainer`, not `KernelExplainer`?**
-Exact, fast Shapley values for tree ensembles — the only choice that makes synchronous, per-request explanations viable inside an API call.
+Exact, fast Shapley values for tree ensembles: the only choice that makes synchronous, per-request explanations viable inside an API call.
 
 **Why separate FastAPI and Streamlit?**
 FastAPI is the model-serving layer; Streamlit is the presentation layer. This separation makes the API independently usable by other clients and lets the model be redeployed without touching the UI.
@@ -367,17 +367,19 @@ FastAPI is the model-serving layer; Streamlit is the presentation layer. This se
 ## Known limitations & future improvements
 
 - Risk-band thresholds (0.20 / 0.50) are business-rule defaults, not calibrated against a real cost matrix (cost of a missed default vs. cost of wrongly rejecting a good applicant).
-- No model monitoring or drift detection — a real deployment should track input-distribution and performance drift post-launch, since applicant populations shift over time.
-- No CI/CD pipeline yet — next step is a GitHub Actions workflow running `pytest` on every push.
-- No authentication on the API — fine for a demo, not for a production credit decision endpoint.
-- Batch scoring is all-or-nothing on a malformed row — a production endpoint might isolate and report per-row failures instead.
+- No model monitoring or drift detection. A real deployment should track input-distribution and performance drift post-launch, since applicant populations shift over time.
+- No CI/CD pipeline yet. Next step is a GitHub Actions workflow running `pytest` on every push.
+- No authentication on the API. Fine for a demo, not for a production credit decision endpoint.
+- Batch scoring is all-or-nothing on a malformed row. A production endpoint might isolate and report per-row failures instead.
 - Further items: probability calibration, more extensive integration testing, cloud deployment.
 
 ## Author
 
 **Niharika Mantravadi**
-B.Tech Computer Science Engineering — Data Science
-_(add LinkedIn / email / portfolio link here)_
+B.Tech Computer Science Engineering, Data Science
+
+LinkedIn: www.linkedin.com/in/niharika-mantravadi
+Email: niharika.m1030@gmail.com
 
 ## License
 

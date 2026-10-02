@@ -1,6 +1,6 @@
 # 💳 Credit Risk Prediction API
 
-An end-to-end machine learning system that predicts the probability of loan default and explains _why_ — using XGBoost for prediction, SHAP for per-decision interpretability, FastAPI for serving, Streamlit for the dashboard, and Docker for reproducible deployment.
+An end-to-end machine learning system that predicts the probability of loan default and explains _why_ - using XGBoost for prediction, SHAP for per-decision interpretability, FastAPI for serving, Streamlit for the dashboard, and Docker for reproducible deployment.
 
 ![Python](https://img.shields.io/badge/python-3.11-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688)
@@ -35,7 +35,7 @@ An end-to-end machine learning system that predicts the probability of loan defa
 
 ## Abstract
 
-Lending decisions carry real financial and human consequences, which makes a "black box" risk score a liability, not just a technical shortcoming — a rejected applicant and the underwriter signing off both deserve to know _why_. This project predicts the probability that a loan applicant will experience serious financial distress using a gradient-boosted tree ensemble (XGBoost) trained on the **Give Me Some Credit** dataset, and pairs every prediction with a SHAP (SHapley Additive exPlanations) breakdown of the features that drove it. The system is split into a stateless FastAPI scoring service and a Streamlit dashboard that consumes it over HTTP — the same separation a production loan-origination pipeline would use, so the model can be scaled, versioned, and monitored independently of the UI.
+Lending decisions carry real financial and human consequences, which makes a "black box" risk score a liability, not just a technical shortcoming - a rejected applicant and the underwriter signing off both deserve to know _why_. This project predicts the probability that a loan applicant will experience serious financial distress using a gradient-boosted tree ensemble (XGBoost) trained on the **Give Me Some Credit** dataset, and pairs every prediction with a SHAP (SHapley Additive exPlanations) breakdown of the features that drove it. The system is split into a stateless FastAPI scoring service and a Streamlit dashboard that consumes it over HTTP — the same separation a production loan-origination pipeline would use, so the model can be scaled, versioned, and monitored independently of the UI.
 
 ## Results
 
